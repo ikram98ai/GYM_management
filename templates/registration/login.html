@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center min-vh-100">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg border-0">
+            <div class="card-body">
+                <h3 class="text-center mb-4">Welcome Back!</h3>
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Display Error Messages -->
+                    {% if form.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        Invalid username or password. Please try again.
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Username Field -->
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required 
+                               placeholder="Enter your username">
+                    </div>
+                    
+                    <!-- Password Field -->
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required 
+                               placeholder="Enter your password">
+                    </div>
+
+                    <!-- Remember Me Checkbox -->
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="remember_me" name="remember_me">
+                        <label class="form-check-label" for="remember_me">Remember me</label>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Log In</button>
+                    </div>
+                    
+                </form>
+                
+           
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Styles -->
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    .card {
+        border-radius: 12px;
+    }
+    .form-control {
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}

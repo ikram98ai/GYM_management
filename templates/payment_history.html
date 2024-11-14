@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Payment History for {{ member.name }}</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Add Payment</button>
+</form>
+
+<h3 class="mt-4">Previous Payments</h3>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Date Paid</th>
+            <th>Amount</th>
+            <th>Due Date</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for payment in payments %}
+        <tr>
+            <td>{{ payment.date_paid }}</td>
+            <td>{{ payment.amount }}</td>
+            <td>{{ payment.due_date }}</td>
+            <td>{{ payment.status }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4">Health Tracking for {{ member.name }}</h2>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5>Add New Health Record</h5>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-success">Add Record</button>
+        </form>
+    </div>
+</div>
+
+<h3 class="mt-5">Health Progress Log</h3>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Date Logged</th>
+            <th>Weight (kg)</th>
+            <th>Height (cm)</th>
+            <th>BMI</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in health_logs %}
+        <tr>
+            <td>{{ log.date_logged }}</td>
+            <td>{{ log.weight }}</td>
+            <td>{{ log.height }}</td>
+            <td>{{ log.bmi }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4" class="text-center">No health records found</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{% url 'member_list' %}" class="btn btn-secondary mt-3">Back to Members List</a>
+{% endblock %}

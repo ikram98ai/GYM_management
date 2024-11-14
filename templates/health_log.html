@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4">Health Log for Members</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Add Health Log</button>
+</form>
+
+<h3 class="mt-5">Health Logs</h3>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Member</th>
+            <th>Date Logged</th>
+            <th>Weight (kg)</th>
+            <th>Height (cm)</th>
+            <th>BMI</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in health_logs %}
+        <tr>
+            <td>{{ log.member.name }}</td>
+            <td>{{ log.date_logged }}</td>
+            <td>{{ log.weight }}</td>
+            <td>{{ log.height }}</td>
+            <td>{{ log.bmi }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
