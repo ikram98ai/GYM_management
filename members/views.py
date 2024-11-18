@@ -3,7 +3,6 @@ from .models import Member, HealthLog
 from .forms import MemberForm, HealthLogForm,PaymentForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from plyer import notification
 from datetime import date, timedelta
 from .models import Payment
 from django.http import HttpResponse
@@ -48,17 +47,12 @@ def check_due_dates(request):
     for payment in upcoming_payments:
         payment.update_status
         message=f"Payment due for {payment.member.name} on {payment.due_date}"
-        # notification.notify(
-        #     title='Fee Due Alert',
-        #     message=message,
-        #     timeout=5
-        # )
         messages.warning(request,message)
 
 
 def member_list(request):
     check_due_dates(request)
-    members = Member.objects.all()
+    members = Member.objects.all().order_by('-join_date')
     return render(request, 'member_list.html', {'members': members})
 
 
@@ -73,21 +67,6 @@ def register_member(request):
     else:
         form = MemberForm()
     return render(request, 'member_form.html', {'form': form})
-
-
-# @login_required
-# @user_passes_test(is_admin)
-# def health_log(request):
-#     if request.method == 'POST':
-#         form = HealthLogForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('health_log')
-#     else:
-#         form = HealthLogForm()
-    
-#     health_logs = HealthLog.objects.select_related('member').all()
-#     return render(request, 'health_log.html', {'form': form, 'health_logs': health_logs})
 
 
 @login_required

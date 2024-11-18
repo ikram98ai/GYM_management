@@ -12,7 +12,7 @@ class HealthLogInline(admin.TabularInline):
     """
     model = HealthLog
     extra = 1  # Number of empty forms to display for adding new records
-    fields = ('weight', 'height', 'bmi', 'date_logged')
+    fields = ('weight', 'height', 'date_logged')
     readonly_fields = ('date_logged',)
     can_delete = True
 
@@ -55,7 +55,7 @@ class MemberAdmin(admin.ModelAdmin):
     """
     Admin interface for managing gym members.
     """
-    list_display = ('id', 'name', 'contact_number', 'join_date', 'profile_photo_thumbnail', 'active_membership')
+    list_display = ('name', 'contact_number', 'join_date', 'profile_photo_thumbnail', 'active_membership')
     search_fields = ('name', 'contact_number')
     list_filter = ('join_date',)
     inlines = [PaymentInline, HealthLogInline, AttendanceInline]

@@ -1,5 +1,0 @@
-django
-xhtml2pdf
-django-htmx
-plyer
-weasyprint
