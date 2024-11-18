@@ -3,17 +3,51 @@
 
 {% block content %}
 <h2 class="mb-4">Members List</h2>
-  <!-- Display Success and Error Messages -->
-  {% if messages %}
-  <div class="mt-3">
-      {% for message in messages %}
-      <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% elif message.tags == 'warning' %}alert-warning{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-      {% endfor %}
-  </div>
-  {% endif %}
+
+<!-- Display Success and Error Messages -->
+{% if messages %}
+<div class="mt-3">
+    {% for message in messages %}
+    <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% elif message.tags == 'warning' %}alert-warning{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Search, Sort, and Filter Form -->
+<form method="get" class="mb-4 row">
+    <div class="col-md-4">
+        <input type="text" name="search" class="form-control" placeholder="Search by Name or Contact No." value="{{ search_query }}">
+    </div>
+    <div class="col-md-2">
+        <select name="sort_by" class="form-select">
+            <option value="">Sort By</option>
+            <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Name</option>
+            <option value="age" {% if sort_by == 'age' %}selected{% endif %}>Age</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select name="gender" class="form-select">
+            <option value="">Gender</option>
+            <option value="M" {% if gender_filter == 'M' %}selected{% endif %}>Male</option>
+            <option value="F" {% if gender_filter == 'F' %}selected{% endif %}>Female</option>
+            <option value="Other" {% if gender_filter == 'O' %}selected{% endif %}>Other</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select name="status" class="form-select">
+            <option value="">Payment Status</option>
+            <option value="Paid" {% if status_filter == 'Paid' %}selected{% endif %}>Paid</option>
+            <option value="Unpaid" {% if status_filter == 'Unpaid' %}selected{% endif %}>Unpaid</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Apply</button>
+    </div>
+</form>
+
 <a href="{% url 'register_member' %}" class="btn btn-primary mb-3">Add New Member</a>
 
 <table class="table table-striped">
@@ -21,6 +55,7 @@
         <tr>
             <th>Profile</th>
             <th>Name</th>
+            <th>Age</th>
             <th>Contact</th>
             <th>Join Date</th>
             <th>Fee Due Date</th>
@@ -29,32 +64,40 @@
         </tr>
     </thead>
     <tbody>
-        {% for member in members %}
-        <tr>
-            <td>
-                {% if member.profile_photo %}
-                <img src="{{ member.profile_photo.url }}" alt="Profile Photo" width="50" height="50" class="rounded-circle">
-                {% else %}
-                <img src="{% static 'images/default_profile.jpg' %}" alt="Profile Photo" width="50" height="50" class="rounded-circle">
-                {% endif %}
-            </td>
-            <td>{{ member.name }}</td>
-            <td>{{ member.contact_number }}</td>
-            <td>{{ member.join_date }}</td>
-            <td>{{ member.payment.last.due_date }}</td>
-            <td>
-                {% if member.payment.last.status == 'Paid' %}
-                    <span class="badge bg-success">Paid</span>
-                {% else %}
-                    <span class="badge bg-danger">Unpaid</span>
-                {% endif %}
-            </td>
-            <td>
-                <a href="{% url 'member_health' member.id %}" class="btn btn-info btn-sm">Health</a>
-                <a href="{% url 'payment_history' member.id %}" class="btn btn-warning btn-sm">Payment History</a>
-            </td>
-        </tr>
-        {% endfor %}
+        {% if members %}
+            {% for member in members %}
+            <tr>
+                <td>
+                    {% if member.profile_photo %}
+                    <img src="{{ member.profile_photo.url }}" alt="Profile Photo" width="50" height="50" class="rounded-circle">
+                    {% else %}
+                    <img src="{% static 'images/default_profile.jpg' %}" alt="Profile Photo" width="50" height="50" class="rounded-circle">
+                    {% endif %}
+                </td>
+                <td>{{ member.name }}</td>
+                <td>{{ member.age }}</td>
+                <td>{{ member.contact_number }}</td>
+                <td>{{ member.join_date }}</td>
+                <td>{{ member.payment.last.due_date }}</td>
+                <td>
+                    {% if member.payment.last.status == 'Paid' %}
+                        <span class="badge bg-success">Paid</span>
+                    {% else %}
+                        <span class="badge bg-danger">Unpaid</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'edit_member' member.id %}" class="btn btn-primary btn-sm">Edit</a>
+                    <a href="{% url 'member_health' member.id %}" class="btn btn-info btn-sm">Health</a>
+                    <a href="{% url 'payment_history' member.id %}" class="btn btn-warning btn-sm">Payment History</a>
+                </td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="7" class="text-center">No members found</td>
+            </tr>
+        {% endif %}
     </tbody>
 </table>
 {% endblock %}

@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Member, HealthLog
 from .forms import MemberForm, HealthLogForm,PaymentForm
 from django.contrib.auth import authenticate, login, logout
+from django.db.models import Q, F, ExpressionWrapper, fields, OuterRef, Subquery, Max
 from django.contrib import messages
 from datetime import date, timedelta
 from .models import Payment
@@ -9,6 +10,7 @@ from django.http import HttpResponse
 from weasyprint import HTML
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.views.decorators.http import require_http_methods
 
 
 def is_admin(user):
@@ -50,11 +52,80 @@ def check_due_dates(request):
         messages.warning(request,message)
 
 
-def member_list(request):
-    check_due_dates(request)
-    members = Member.objects.all().order_by('-join_date')
-    return render(request, 'member_list.html', {'members': members})
+@login_required
+@user_passes_test(is_admin)
+@require_http_methods(["GET", "POST"])
+def edit_member(request,id):
+    member = get_object_or_404(Member, pk=id)
+ 
+    if request.method == 'POST':
+        # Update member details based on form submission
+        member.name = request.POST.get('name', member.name)
+        member.contact_number = request.POST.get('contact_number', member.contact_number)
+        join_date = request.POST.get('join_date')
+        member.join_date = join_date if join_date else member.join_date
 
+        # Update age by adjusting the date of birth
+        age = request.POST.get('age')
+        if age:
+            member.date_of_birth = date.today().replace(year=date.today().year - int(age))
+        
+        if 'profile_photo' in request.FILES:
+            member.profile_photo = request.FILES['profile_photo']
+        
+        member.save()
+        messages.success(request, 'Member details updated successfully!')
+        return redirect('member_list')
+
+    return render(request, 'edit_member.html', {'member': member})
+
+
+def member_list(request):
+    # check_due_dates(request)
+    
+    # Fetch all members
+    members = Member.objects.all()
+    
+    # Get query parameters for search, sort, and filters
+    search_query = request.GET.get('search', '')
+    sort_by = request.GET.get('sort_by', 'join_date')
+    gender_filter = request.GET.get('gender')
+    status_filter = request.GET.get('status')
+
+
+    # Calculate age based on birthdate
+    members = members.annotate(
+        age=ExpressionWrapper(
+            date.today().year - F('birthdate__year'),
+            output_field=fields.IntegerField()
+        )
+    )
+    
+    # Search by name or contact number
+    if search_query:
+        members = members.filter(Q(name__icontains=search_query) | Q(contact_number__icontains=search_query))
+    
+    # Filter by gender
+    if gender_filter:
+        members = members.filter(gender=gender_filter)
+    
+    # Filter by payment status (Paid/Unpaid)
+    latest_payment_status = Payment.objects.filter(member=OuterRef('pk')).order_by('-due_date').values('status')[:1]
+
+    if status_filter == 'Paid':
+        members = members.annotate(latest_status=Subquery(latest_payment_status)).filter(latest_status='Paid')
+    elif status_filter == 'Unpaid':
+        members = members.annotate(latest_status=Subquery(latest_payment_status)).filter(latest_status='Unpaid')
+
+    # Sorting
+    if sort_by == 'name':
+        members = members.order_by('name')
+    elif sort_by == 'age':
+        members = members.order_by('age')
+    else:
+        members = members.order_by('-join_date')  # Default sort by join_date (newest first)
+    
+    return render(request, 'member_list.html', {'members': members, 'search_query': search_query, 'sort_by': sort_by, 'gender_filter': gender_filter, 'status_filter': status_filter})
 
 @login_required
 @user_passes_test(is_admin)

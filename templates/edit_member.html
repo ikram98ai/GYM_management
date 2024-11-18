@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<h2 class="mb-4">Edit Member - {{ member.name }}</h2>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="profile_photo" class="form-label">Profile Photo</label><br>
+        {% if member.profile_photo %}
+            <img src="{{ member.profile_photo.url }}" alt="Profile Photo" width="100" height="100" class="rounded-circle mb-3">
+        {% else %}
+            <img src="{% static 'images/default_profile.jpg' %}" alt="Default Profile Photo" width="100" height="100" class="rounded-circle mb-3">
+        {% endif %}
+        <input type="file" class="form-control" id="profile_photo" name="profile_photo">
+    </div>
+
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" class="form-control" id="name" name="name" value="{{ member.name }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="age" class="form-label">Age</label>
+        <input type="number" class="form-control" id="age" name="age" value="{{ member.age }}" min="0" max="120">
+    </div>
+
+    <div class="mb-3">
+        <label for="contact_number" class="form-label">Contact Number</label>
+        <input type="text" class="form-control" id="contact_number" name="contact_number" value="{{ member.contact_number }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="join_date" class="form-label">Join Date</label>
+        <input type="date" class="form-control" id="join_date" name="join_date" value="{{ member.join_date }}">
+    </div>
+
+    <button type="submit" class="btn btn-success">Save Changes</button>
+    <a href="{% url 'member_list' %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}
